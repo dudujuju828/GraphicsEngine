@@ -2,7 +2,7 @@
 #include "../include/window.hpp"
 #include <string>
 #include <string_view>
-#include <cstdef>
+#include <cstddef>
 #include <GLFW/glfw3.h>
 
 Window::Window(std::string_view window_name) :
