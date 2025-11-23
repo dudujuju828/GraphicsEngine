@@ -13,7 +13,7 @@ private:
 public:
 	~Window();
 	Window(std::string_view window_name);
-	GLFWwindow* get_handle();
+	GLFWwindow* getHandle();
 };
 
 #endif

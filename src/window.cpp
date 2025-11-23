@@ -14,20 +14,26 @@ Window::~Window(){};
 
 Window::Window(std::string_view window_name) {
 	if (!glfwInit()) {
-		std::cerr << "Error: glfwInit()\n";
+		spdlog::error("GLFW failed to initialize.");
 	} else {
-		spdlog::info("Success: glfwInit()");
+		spdlog::info("GLFW successfully initialized.");
 	}
 
 	GLFWmonitor* primary_monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* primary_mode = glfwGetVideoMode(primary_monitor);
 	int primary_width = primary_mode->width;	
 	int primary_height = primary_mode->height;	
-	std::cout << "Success: glfwInit()\n";
-	
 	window_handle = glfwCreateWindow(primary_width, primary_height, window_name.data(), nullptr, nullptr);
+
+	int framebuffer_width, framebuffer_height;
+	glfwGetFramebufferSize(window_handle,&framebuffer_width,&framebuffer_height);
+
+	if (window_handle) {
+		spdlog::info("Window created from monitor of width {} and height {}.",primary_width,primary_height);
+		spdlog::info("Window has framebuffer width {} with framebuffer height {}.",primary_width,primary_height);
+	}
 }
 
-GLFWwindow* Window::get_handle() {
+GLFWwindow* Window::getHandle() {
 	return window_handle;
 }
