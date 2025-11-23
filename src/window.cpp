@@ -1,8 +1,12 @@
 
 #include "../include/window.hpp"
+
 #include <string>
 #include <string_view>
 #include <cstddef>
+#include <iostream>
+
+
 #include <GLFW/glfw3.h>
 
 Window::Window(std::string_view window_name) :
