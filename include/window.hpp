@@ -14,6 +14,7 @@ public:
 	~Window();
 	Window(std::string_view window_name);
 	GLFWwindow* getHandle();
+	bool isOpen();
 };
 
 #endif

@@ -7,10 +7,8 @@
 int main() {
 
 
-	Window window("mywindow");
-	GLFWwindow* window_handle = window.get_handle();
-
-	glfwMakeContextCurrent(window_handle);
+	Window window("Graphics");
+	GLFWwindow* window_handle = window.getHandle();
 
 	while (!glfwWindowShouldClose(window_handle)) {
 		

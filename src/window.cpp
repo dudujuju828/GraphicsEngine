@@ -32,8 +32,15 @@ Window::Window(std::string_view window_name) {
 		spdlog::info("Window created from monitor of width {} and height {}.",primary_width,primary_height);
 		spdlog::info("Window has framebuffer width {} with framebuffer height {}.",primary_width,primary_height);
 	}
+	
+	glfwMakeContextCurrent(window_handle);
+	spdlog::info("OpenGL context of window named {} has been made current.",window_name);
 }
 
 GLFWwindow* Window::getHandle() {
 	return window_handle;
+}
+
+bool Window::isOpen() {
+	return !glfwWindShouldClose(window_handle);
 }
