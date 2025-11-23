@@ -1,7 +1,10 @@
 
 #include "../include/glad/glad.h"
 #include "../include/engine.hpp"
+#include "../include/shader.hpp"
+
 #include <string_view>
+#include <filesystem>
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -18,6 +21,11 @@ void Engine::run() {
 	ImGui_ImplOpenGL3_Init("#version 330");
 	static bool show_wireframe = false;
 	*/
+	std::filesystem::path vpath("src/vs.txt");
+	std::filesystem::path fpath("src/vs.txt");
+	Shader shader(vpath,fpath);
+	
+	
 	
 	while (window.isOpen()) {
 		window.pollEvents();
