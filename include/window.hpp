@@ -12,7 +12,7 @@ private:
 
 public:
 	~Window();
-	Window(std::string window_name);
+	Window(std::string_view window_name);
 	GLFWwindow* get_handle();
 };
 
