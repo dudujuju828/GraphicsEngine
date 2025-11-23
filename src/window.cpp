@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 #include <cstdef>
+#include <GLFW/glfw3.h>
 
 Window::Window(std::string_view window_name) :
 			  {
@@ -18,3 +19,7 @@ Window::Window(std::string_view window_name) :
 					
 					window_handle = glfwCreateWindow(primary_width, primary_height, window_name, nullptr, nullptr);
 			  }
+
+GLFWwindow* Window::get_handle() {
+	return window_handle;
+}

@@ -2,21 +2,12 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include "../include/window.hpp"
+
 int main() {
 
-	if (!glfwInit()) {
-		std::cerr << "ERROR: glfwInit() failed.\n";
-		return -1;
-	} else {
-		std::cout << "GLFW Initialized.\n";
-	}
 
-	GLFWwindow* window = glfwCreateWindow(800,600,"TITLE",nullptr,nullptr);
-	if (window) {
-		std::cout << "Window created.\n";
-	} else {
-		std::cerr << "Failed to create window.\n";
-	}
+	Window window("mywindow");
 
 	glfwMakeContextCurrent(window);
 
