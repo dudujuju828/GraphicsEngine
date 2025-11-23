@@ -44,3 +44,11 @@ GLFWwindow* Window::getHandle() {
 bool Window::isOpen() {
 	return !glfwWindShouldClose(window_handle);
 }
+
+void Window::pollEvents() {
+	glfwPollEvents();
+}
+
+void Window::swapBuffers() {
+	glfwSwapBuffers(window_handle);
+}

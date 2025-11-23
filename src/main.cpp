@@ -10,7 +10,7 @@ int main() {
 	Window window("Graphics");
 	GLFWwindow* window_handle = window.getHandle();
 
-	while (!glfwWindowShouldClose(window_handle)) {
+	while (window.isOpen()) {
 		
 		glfwSwapBuffers(window_handle);
 		glfwPollEvents();	

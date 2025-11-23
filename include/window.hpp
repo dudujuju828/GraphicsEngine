@@ -15,6 +15,8 @@ public:
 	Window(std::string_view window_name);
 	GLFWwindow* getHandle();
 	bool isOpen();
+	void pollEvents();
+	void swapBuffers();
 };
 
 #endif
