@@ -20,6 +20,6 @@ add_library(imgui
 
 target_include_directories(imgui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backend)
 
-add_executable(main src/main.cpp src/window.cpp src/glad.c)
+add_executable(main src/main.cpp src/engine.cpp src/window.cpp src/glad.c)
 target_include_directories(main PRIVATE include/)
 target_link_libraries(main spdlog fmt glfw imgui)

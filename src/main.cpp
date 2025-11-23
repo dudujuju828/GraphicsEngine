@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "../include/window.hpp"
+#include "../include/engine.hpp"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -13,37 +14,8 @@
 int main() {
 
 
-	Window window("Graphics");
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOpenGL(window.getHandle(), true);
-	ImGui_ImplOpenGL3_Init("#version 330");
-
-
-	while (window.isOpen()) {
-		window.pollEvents();
-		
-		glClearColor(0.5f,0.5f,0.5f,1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		// minimal test window
-		ImGui::Begin("Hello, ImGui");
-		ImGui::Text("If you see this, ImGui is working.");
-		ImGui::End();
-
-		// render ImGui
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		
-		window.swapBuffers();
-	}
+	Engine engine("Graphics");
+	engine.run();
 
 	return 0;
 }
