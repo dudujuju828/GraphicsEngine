@@ -2,7 +2,7 @@
 #ifndef SRC_WINDOW_HPP
 #define SRC_WINDOW_HPP
 
-#include <string>
+#include <string_view>
 #include <cstddef>
 #include <GLFW/glfw3.h>
 
