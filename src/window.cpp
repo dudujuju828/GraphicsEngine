@@ -1,15 +1,15 @@
 
-#include "../include/window.hpp"
-
 #include <string>
 #include <string_view>
 #include <cstddef>
 #include <iostream>
 
 
+#include "../include/glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
-#include "../include/glad/glad.h"
+
+#include "../include/window.hpp"
 
 Window::~Window(){
 	glfwDestroyWindow(window_handle);
@@ -45,8 +45,15 @@ Window::Window(std::string_view window_name) {
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		spdlog::error("GLAD unable to load function pointers.");	
 	} else {
-		spdlog::info("OpenGL function pointers successfully loaded.")
+		spdlog::info("OpenGL function pointers successfully loaded.");
 	}
+
+	glfwSetFramebufferSizeCallback(window_handle, framebuffer_size_callback);
+}
+
+void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	spdlog::info("Framebuffer resizing to width {} and height {}.",width,height);
+	glViewport(0, 0, width, height);	
 }
 
 GLFWwindow* Window::getHandle() {
