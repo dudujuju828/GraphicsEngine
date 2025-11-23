@@ -3,7 +3,7 @@
 #define SRC_WINDOW_HPP
 
 #include <string>
-#include <cstdef>
+#include <cstddef>
 #include <GLFW/glfw3.h>
 
 class Window {

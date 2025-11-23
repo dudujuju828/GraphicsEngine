@@ -8,12 +8,13 @@ int main() {
 
 
 	Window window("mywindow");
+	GLFWwindow* window_handle = window.get_handle();
 
-	glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent(window_handle);
 
-	while (!glfwWindowShouldClose(window)) {
+	while (!glfwWindowShouldClose(window_handle)) {
 		
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(window_handle);
 		glfwPollEvents();	
 	}
 
