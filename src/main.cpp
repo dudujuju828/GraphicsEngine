@@ -8,14 +8,13 @@ int main() {
 
 
 	Window window("Graphics");
-	GLFWwindow* window_handle = window.getHandle();
 
 	while (window.isOpen()) {
+		window.pollEvents();
 		
-		glfwSwapBuffers(window_handle);
-		glfwPollEvents();	
+		
+		window.swapBuffers();
 	}
 
-	glfwTerminate();
 	return 0;
 }

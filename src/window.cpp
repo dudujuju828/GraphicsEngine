@@ -10,7 +10,12 @@
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
 
-Window::~Window(){};
+Window::~Window(){
+	glfwDestroyWindow(window_handle);
+	spdlog::warn("Window destroyed.");
+	glfwTerminate();
+	spdlog::warn("GLFW terminated.");
+};
 
 Window::Window(std::string_view window_name) {
 	if (!glfwInit()) {
@@ -42,7 +47,7 @@ GLFWwindow* Window::getHandle() {
 }
 
 bool Window::isOpen() {
-	return !glfwWindShouldClose(window_handle);
+	return !glfwWindowShouldClose(window_handle);
 }
 
 void Window::pollEvents() {
