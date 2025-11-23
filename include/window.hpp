@@ -8,11 +8,11 @@
 
 class Window {
 private:
-	GLFWwindow* windowHandle;
+	GLFWwindow* window_handle;
 
 public:
 	~Window();
-	Window(std::string window_name, std::size_t width, std::size_t height);
+	Window(std::string window_name);
 };
 
 #endif
