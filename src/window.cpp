@@ -9,6 +9,7 @@
 
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
+#include "../include/glad/glad.h"
 
 Window::~Window(){
 	glfwDestroyWindow(window_handle);
@@ -40,6 +41,12 @@ Window::Window(std::string_view window_name) {
 	
 	glfwMakeContextCurrent(window_handle);
 	spdlog::info("OpenGL context of window named {} has been made current.",window_name);
+	
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		spdlog::error("GLAD unable to load function pointers.");	
+	} else {
+		spdlog::info("OpenGL function pointers successfully loaded.")
+	}
 }
 
 GLFWwindow* Window::getHandle() {
