@@ -5,6 +5,7 @@
 
 #include <string_view>
 #include <filesystem>
+#include <vector>
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -25,6 +26,21 @@ void Engine::run() {
 	std::filesystem::path fpath("src/vs.txt");
 	Shader shader(vpath,fpath);
 	
+	std::vector<float> data {
+		1.0f,0.0f,0.0f,
+		0.0f,0.0f,0.0f,
+		0.5f,1.0f,0.0f
+	};
+
+	GLuint VBO;
+	glGenBuffers(1,&VBO);
+	glBindBuffer(GL_ARRAY_BUFFER,VBO);
+	
+	GLuint VAO;
+	glGenVertexArrayS(1,&VAO);
+	glBindVertexArray(VAO);
+	
+	glBufferData(GL_ARRAY_BUFFER,data.size(),data.data(),GL_STATIC_DRAW);
 	
 	
 	while (window.isOpen()) {
