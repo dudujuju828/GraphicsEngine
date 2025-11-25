@@ -8,6 +8,8 @@ message("Cmake Source Dir: ${CMAKE_SOURCE_DIR}")
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/external/imgui)
 message("IMGUI_DIR: ${IMGUI_DIR}")
 
+set(GLM_DIR ${CMAKE_SOURCE_DIR}/external/glm)
+
 add_library(imgui
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/imgui_draw.cpp
@@ -20,6 +22,6 @@ add_library(imgui
 
 target_include_directories(imgui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backend)
 
-add_executable(main src/main.cpp src/engine.cpp src/window.cpp src/shader.cpp src/mesh.cpp src/glad.c)
-target_include_directories(main PRIVATE include/)
+add_executable(main src/main.cpp src/engine.cpp src/window.cpp src/shader.cpp src/mesh.cpp src/glad.c src/object.cpp)
+target_include_directories(main PRIVATE include/ ${GLM_DIR})
 target_link_libraries(main spdlog fmt glfw imgui)

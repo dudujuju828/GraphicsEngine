@@ -2,6 +2,7 @@
 #include "../include/glad/glad.h"
 #include "../include/mesh.hpp"
 #include "../include/engine.hpp"
+#include "../include/object.hpp"
 #include "../include/shader.hpp"
 
 #include <string_view>
@@ -23,12 +24,10 @@ void Engine::run() {
 	ImGui_ImplOpenGL3_Init("#version 330");
 	static bool show_wireframe = false;
 	*/
-	std::filesystem::path vpath("src/vertex_s.glsl");
-	std::filesystem::path fpath("src/fragment_s.glsl");
-	Shader shader(vpath,fpath);
+	Shader shader("src/vertex_s.glsl","src/fragment_s.glsl");
 	glUseProgram(shader.getID());
 	
-	Mesh triangle("src/triangle.obj");
+	Object triangle("src/triangle.obj");
 
 	
 	while (window.isOpen()) {

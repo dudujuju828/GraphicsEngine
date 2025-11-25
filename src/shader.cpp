@@ -7,7 +7,7 @@
 #include <string>
 #include <spdlog/spdlog.h>
 
-Shader::Shader(std::filesystem::path &vertex_path, std::filesystem::path &fragment_path) {
+Shader::Shader(std::filesystem::path vertex_path, std::filesystem::path fragment_path) {
 
 	GLuint vertex_id = compileShader(loadFromFile(vertex_path), GL_VERTEX_SHADER);
 	GLuint fragment_id = compileShader(loadFromFile(fragment_path), GL_FRAGMENT_SHADER);

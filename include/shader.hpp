@@ -17,7 +17,7 @@ private:
 	void createProgram(GLuint vertex_id, GLuint fragment_id);
 	
 public:
-	Shader(std::filesystem::path &vertex_path, std::filesystem::path &fragment_path);
+	Shader(std::filesystem::path vertex_path, std::filesystem::path fragment_path);
 	GLuint getID();
 	void useProgram();
 
