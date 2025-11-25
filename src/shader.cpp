@@ -21,7 +21,6 @@ GLuint Shader::getID() {
 }
 
 void Shader::useProgram() {
-	spdlog::info("useProgram called with program ID: {}",programID);
 	glUseProgram(programID);
 }
 
@@ -72,11 +71,19 @@ GLuint Shader::compileShader(const std::string& source, GLenum shader_type) {
 	return shader_id;
 }
 
-void Shader::setVec3(std::string_view name, glm::vec3 &value) {
+void Shader::setVec3(std::string_view name, glm::vec3 value) {
 	GLint location = glGetUniformLocation(programID, name.data());
 	if (location != -1) {
 		glUniform3fv(location, 1, glm::value_ptr(value));
 	}
+}
+
+void Shader::setMat4(std::string_view name, glm::mat4 value) {
+	GLint location = glGetUniformLocation(programID, name.data());
+	if (location != -1) {
+		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
+	}
+	
 }
 
 std::string Shader::loadFromFile(const std::filesystem::path path) {
