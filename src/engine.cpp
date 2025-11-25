@@ -29,6 +29,8 @@ void Engine::run() {
 	
 	Object triangle("src/triangle.obj");
 
+	float scale = 1.0f;
+
 	
 	while (window.isOpen()) {
 		window.setColor(0.0f,0.5f,0.5f);
@@ -36,9 +38,11 @@ void Engine::run() {
 
 
 		window.pollEvents();
-		
 
-		triangle.draw();
+
+		scale -= 0.001f;		
+		triangle.setScale(glm::vec3(scale));
+		triangle.draw(shader);
 
 		window.swapBuffers();
 

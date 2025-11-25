@@ -6,6 +6,8 @@
 #include <sstream>
 #include <string>
 #include <spdlog/spdlog.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Shader::Shader(std::filesystem::path vertex_path, std::filesystem::path fragment_path) {
 
@@ -68,6 +70,13 @@ GLuint Shader::compileShader(const std::string& source, GLenum shader_type) {
 	checkCompilationStatus(shader_id);
 	
 	return shader_id;
+}
+
+void Shader::setVec3(std::string_view name, glm::vec3 &value) {
+	GLint location = glGetUniformLocation(programID, name.data());
+	if (location != -1) {
+		glUniform3fv(location, 1, glm::value_ptr(value));
+	}
 }
 
 std::string Shader::loadFromFile(const std::filesystem::path path) {

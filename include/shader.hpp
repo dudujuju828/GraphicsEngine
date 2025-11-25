@@ -2,6 +2,7 @@
 #ifndef SRC_SHADER_HPP
 #define SRC_SHADER_HPP
 
+#include <glm/glm.hpp>
 #include <string_view>
 #include <string>
 #include <filesystem>
@@ -20,6 +21,8 @@ public:
 	Shader(std::filesystem::path vertex_path, std::filesystem::path fragment_path);
 	GLuint getID();
 	void useProgram();
+	void setVec3(std::string_view name, glm::vec3 &value);
+	
 
 };
 
