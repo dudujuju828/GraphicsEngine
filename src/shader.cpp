@@ -14,22 +14,58 @@ Shader::Shader(std::filesystem::path &vertex_path, std::filesystem::path &fragme
 	createProgram(vertex_id, fragment_id);
 }
 
+GLuint Shader::getID() {
+	return programID;
+}
+
+void Shader::useProgram() {
+	spdlog::info("useProgram called with program ID: {}",programID);
+	glUseProgram(programID);
+}
+
 void Shader::createProgram(GLuint vertex_id, GLuint fragment_id) {
 	programID = glCreateProgram();
 	glAttachShader(programID, vertex_id);
 	glAttachShader(programID, fragment_id);
 	glLinkProgram(programID);
 	
+	GLint status = 0;	
+	glGetProgramiv(programID,GL_LINK_STATUS,&status);
+	
+	if (status) {
+		spdlog::info("Program linking was successful.");
+	} else {
+		char bufferLog[512];
+		glGetProgramInfoLog(programID,512,nullptr,bufferLog);
+		spdlog::error("Program linking was unsuccessful: {}",bufferLog);
+	}
+
+	
 	glDeleteShader(vertex_id);
 	glDeleteShader(fragment_id);
+}
+
+void Shader::checkCompilationStatus(GLuint shaderID) {
+	GLint status = 0;
+	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &status);
+	
+	if (status) {
+		spdlog::info("Shader compilation was successful.");
+	} else {
+		char bufferLog[512];
+		glGetShaderInfoLog(shaderID,512,nullptr,bufferLog);
+		spdlog::error("Error compiling shader: {}",bufferLog);
+	}
 }
 
 GLuint Shader::compileShader(const std::string& source, GLenum shader_type) {
 	GLuint shader_id = glCreateShader(shader_type);	
 	const char* src = source.c_str();
+	spdlog::info("Shader compilation started, with contents: {}",src);
 	
 	glShaderSource(shader_id,1,&src,nullptr);
 	glCompileShader(shader_id);
+	checkCompilationStatus(shader_id);
 	
 	return shader_id;
 }

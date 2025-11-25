@@ -22,32 +22,37 @@ void Engine::run() {
 	ImGui_ImplOpenGL3_Init("#version 330");
 	static bool show_wireframe = false;
 	*/
-	std::filesystem::path vpath("src/vs.txt");
-	std::filesystem::path fpath("src/vs.txt");
+	std::filesystem::path vpath("src/vertex_s.glsl");
+	std::filesystem::path fpath("src/fragment_s.glsl");
 	Shader shader(vpath,fpath);
+	glUseProgram(shader.getID());
 	
-	std::vector<float> data {
+	std::vector<float> vertex_data {
 		1.0f,0.0f,0.0f,
 		0.0f,0.0f,0.0f,
 		0.5f,1.0f,0.0f
 	};
 
-	GLuint VBO;
+	GLuint VBO,VAO;
 	glGenBuffers(1,&VBO);
-	glBindBuffer(GL_ARRAY_BUFFER,VBO);
-	
-	GLuint VAO;
-	glGenVertexArrayS(1,&VAO);
+	glGenVertexArrays(1,&VAO);
 	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER,VBO);
+	glBufferData(GL_ARRAY_BUFFER,vertex_data.size()*sizeof(float),vertex_data.data(),GL_STATIC_DRAW);
 	
-	glBufferData(GL_ARRAY_BUFFER,data.size(),data.data(),GL_STATIC_DRAW);
+	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+	glEnableVertexAttribArray(0);
+	
 	
 	
 	while (window.isOpen()) {
 		window.pollEvents();
 		
-		glClearColor(0.5f,0.5f,0.5f,1.0f);
+		glClearColor(0.2f,0.2f,0.2f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glDrawArrays(GL_TRIANGLES,0,3);
 
 
 		window.swapBuffers();
