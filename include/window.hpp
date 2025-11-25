@@ -18,6 +18,7 @@ public:
 	void pollEvents();
 	void swapBuffers();
 	void setColor(float r, float g, float b);
+	void setCursorCaptured(bool captured);
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 };

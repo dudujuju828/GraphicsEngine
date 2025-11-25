@@ -76,3 +76,9 @@ void Window::setColor(float r, float g, float b) {
 void Window::swapBuffers() {
 	glfwSwapBuffers(window_handle);
 }
+
+void Window::setCursorCaptured(bool captured) {
+    glfwSetInputMode(window_handle,
+                     GLFW_CURSOR,
+                     captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+}
