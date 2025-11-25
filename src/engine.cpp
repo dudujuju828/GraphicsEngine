@@ -1,5 +1,6 @@
 
 #include "../include/glad/glad.h"
+#include "../include/mesh.hpp"
 #include "../include/engine.hpp"
 #include "../include/shader.hpp"
 
@@ -27,33 +28,18 @@ void Engine::run() {
 	Shader shader(vpath,fpath);
 	glUseProgram(shader.getID());
 	
-	std::vector<float> vertex_data {
-		1.0f,0.0f,0.0f,
-		0.0f,0.0f,0.0f,
-		0.5f,1.0f,0.0f
-	};
+	Mesh triangle("src/triangle.obj");
 
-	GLuint VBO,VAO;
-	glGenBuffers(1,&VBO);
-	glGenVertexArrays(1,&VAO);
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER,VBO);
-	glBufferData(GL_ARRAY_BUFFER,vertex_data.size()*sizeof(float),vertex_data.data(),GL_STATIC_DRAW);
-	
-	glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
-	glEnableVertexAttribArray(0);
-	
-	
 	
 	while (window.isOpen()) {
+		window.setColor(0.0f,0.5f,0.5f);
+
+
+
 		window.pollEvents();
 		
-		glClearColor(0.2f,0.2f,0.2f,1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
 
-		glDrawArrays(GL_TRIANGLES,0,3);
-
+		triangle.draw();
 
 		window.swapBuffers();
 

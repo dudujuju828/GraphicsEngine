@@ -17,6 +17,7 @@ public:
 	bool isOpen();
 	void pollEvents();
 	void swapBuffers();
+	void setColor(float r, float g, float b);
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 };

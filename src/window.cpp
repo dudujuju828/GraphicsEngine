@@ -68,6 +68,11 @@ void Window::pollEvents() {
 	glfwPollEvents();
 }
 
+void Window::setColor(float r, float g, float b) {
+	glClearColor(r,g,b,1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
 void Window::swapBuffers() {
 	glfwSwapBuffers(window_handle);
 }
