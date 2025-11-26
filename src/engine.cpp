@@ -64,6 +64,7 @@ void Engine::run() {
     GLFWwindow* glfwWin = window.getHandle();
 
     Shader shader("src/vertex_s.glsl", "src/fragment_s.glsl");
+    Shader model("src/model_vs.glsl", "src/model_fs.glsl");
 
     const siv::PerlinNoise::seed_type seed = 123456u;
     siv::PerlinNoise perlin{ seed };
@@ -80,10 +81,11 @@ void Engine::run() {
 
     Object terrain{ std::move(terrainMesh) };
     terrain.transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	
-	glEnable(GL_DEPTH_TEST);
-	
 
+    std::filesystem::path modelPath = "assets/models/bunny.obj"; 
+    Object modelObject{modelPath};  	
+
+	glEnable(GL_DEPTH_TEST);
     lastFrameTime = static_cast<float>(glfwGetTime());
 
     while (!glfwWindowShouldClose(glfwWin)) {
@@ -96,17 +98,22 @@ void Engine::run() {
         processMouse();
 
         window.setColor(0.1f, 0.1f, 0.15f);
+	
+		glm::mat4 projection = camera.getProjectionMatrix();
+		glm::mat4 view = camera.getViewMatrix();
 
         shader.useProgram();
-        shader.setMat4("view", camera.getViewMatrix());
-        shader.setMat4("projection", camera.getProjectionMatrix());
-
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
 		shader.setFloat("uMinHeight", -terrainAmplitude);
 		shader.setFloat("uMaxHeight", terrainAmplitude);
-
-
         terrain.draw(shader);
 
+		model.useProgram();
+        model.setMat4("view", view);
+        model.setMat4("projection", projection);
+		modelObject.draw(model);
+	
         window.swapBuffers();
     }
 }
