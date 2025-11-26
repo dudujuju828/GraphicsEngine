@@ -80,6 +80,9 @@ void Engine::run() {
 
     Object terrain{ std::move(terrainMesh) };
     terrain.transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	
+	glEnable(GL_DEPTH_TEST);
+	
 
     lastFrameTime = static_cast<float>(glfwGetTime());
 
