@@ -9,6 +9,13 @@ set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/external/imgui)
 message("IMGUI_DIR: ${IMGUI_DIR}")
 
 set(GLM_DIR ${CMAKE_SOURCE_DIR}/external/glm)
+set(ASSIMP_DIR ${CMAKE_SOURCE_DIR}/external/assimp)
+
+option(ASSIMP_BUILD_TESTS "Build Assimp tests" OFF)
+option(ASSIMP_BUILD_ASSIMP_TOOLS "Build Assimp tools" OFF)
+option(ASSIMP_INSTALL "Install Assimp" OFF)
+
+add_subdirectory(${ASSIMP_DIR})
 
 add_library(imgui
     ${IMGUI_DIR}/imgui.cpp
@@ -25,4 +32,4 @@ target_include_directories(imgui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backend)
 add_executable(main src/main.cpp src/engine.cpp src/window.cpp src/shader.cpp src/mesh.cpp src/glad.c src/object.cpp
 					src/camera.cpp src/terrain.cpp)
 target_include_directories(main PRIVATE include/ ${GLM_DIR})
-target_link_libraries(main spdlog fmt glfw imgui)
+target_link_libraries(main spdlog fmt glfw imgui assimp)
