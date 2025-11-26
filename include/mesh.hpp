@@ -8,11 +8,13 @@
 
 class Mesh {
 	private:
-	GLuint VBO;
-	GLuint VAO;
+	GLuint VBO = 0;
+	GLuint VAO = 0;
+	int vertexCount = 0;
 	
 	public:
 	Mesh(std::filesystem::path objfile_path);
+	Mesh(const std::vector<float>& positions);
 	void use();
 	void draw();
 
