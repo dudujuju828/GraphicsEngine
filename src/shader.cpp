@@ -86,6 +86,11 @@ void Shader::setMat4(std::string_view name, glm::mat4 value) {
 	
 }
 
+void Shader::setFloat(std::string_view name, float value) {
+	GLint location = glGetUniformLocation(programID, name.data());
+	glUniform1f(location,value);
+}
+
 std::string Shader::loadFromFile(const std::filesystem::path path) {
 
 	spdlog::info("File at {} is being read into string.",path.string());	

@@ -68,13 +68,14 @@ void Engine::run() {
     const siv::PerlinNoise::seed_type seed = 123456u;
     siv::PerlinNoise perlin{ seed };
 
+	float terrainAmplitude = 5.0f;
     Mesh terrainMesh = createTerrainMesh(
         200, 200,        // xSegments, zSegments
         100.0f, 100.0f,  // sizeX, sizeZ
         perlin,
         0.03,            // frequency
         6,               // octaves
-        5.0f             // amplitude
+        terrainAmplitude             // amplitude
     );
 
     Object terrain{ std::move(terrainMesh) };
@@ -96,6 +97,10 @@ void Engine::run() {
         shader.useProgram();
         shader.setMat4("view", camera.getViewMatrix());
         shader.setMat4("projection", camera.getProjectionMatrix());
+
+		shader.setFloat("uMinHeight", -terrainAmplitude);
+		shader.setFloat("uMaxHeight", terrainAmplitude);
+
 
         terrain.draw(shader);
 
