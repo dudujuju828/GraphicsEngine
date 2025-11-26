@@ -12,6 +12,12 @@ class Engine {
 	Camera camera;
 	float lastFrameTime = 0.0f;
 	void processInput(float deltaTime);
+
+	bool firstMouse;
+	bool mouseCaptured = true;
+	float lastMouseX = 0.0f;
+	float lastMouseY = 0.0f;
+	void processMouse();
 	
 	public:
 	Engine(std::string_view s);

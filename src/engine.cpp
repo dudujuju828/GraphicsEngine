@@ -13,11 +13,49 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
-Engine::Engine(std::string_view s) : window(s), camera(glm::vec3(0.0f, 0.0f, 3.0f)) {
-		GLFWwindow* win = window.getHandle();
-		int width, height;
-		glfwGetFramebufferSize(win,&width,&height);
-		camera.setAspectRatio(static_cast<float>(width) / static_cast<float>(height));	
+Engine::Engine(std::string_view title) : window(title), camera(glm::vec3(0.0f, 0.0f, 3.0f)) {
+    GLFWwindow* glfwWin = window.getHandle();
+
+    int width, height;
+    glfwGetFramebufferSize(glfwWin, &width, &height);
+    camera.setAspectRatio(static_cast<float>(width) / static_cast<float>(height));
+    glViewport(0, 0, width, height);
+
+    window.setCursorCaptured(true);
+
+    double xpos, ypos;
+    glfwGetCursorPos(glfwWin, &xpos, &ypos);
+    lastMouseX = static_cast<float>(xpos);
+    lastMouseY = static_cast<float>(ypos);
+    firstMouse = false;
+}
+
+void Engine::processMouse() {
+	
+	if (!mouseCaptured) return;
+
+    GLFWwindow* glfwWin = window.getHandle();
+
+    double xposD, yposD;
+    glfwGetCursorPos(glfwWin, &xposD, &yposD);
+
+    float xpos = static_cast<float>(xposD);
+    float ypos = static_cast<float>(yposD);
+
+    if (firstMouse) {
+        lastMouseX = xpos;
+        lastMouseY = ypos;
+        firstMouse = false;
+        return;
+    }
+
+    float xoffset = xpos - lastMouseX;
+    float yoffset = lastMouseY - ypos; // reversed: y goes down in screen coords
+
+    lastMouseX = xpos;
+    lastMouseY = ypos;
+
+    camera.processMouseMovement(xoffset, yoffset);
 }
 
 void Engine::run() {
@@ -42,6 +80,7 @@ void Engine::run() {
 		
 		window.pollEvents();
 		processInput(deltaTime);
+		processMouse();
 
 
 		window.setColor(0.0f,0.5f,0.5f);
@@ -67,8 +106,24 @@ void Engine::run() {
 	}
 }
 
+
 void Engine::processInput(float deltaTime) {
     GLFWwindow* glfwWin = window.getHandle();
+	
+	if (glfwGetKey(glfwWin, GLFW_KEY_M) == GLFW_PRESS) {
+		if (!mouseCaptured) {
+			window.setCursorCaptured(true);
+			mouseCaptured = true;
+			firstMouse = true; // recenter offsets next time
+		}
+	}
+	if (glfwGetKey(glfwWin, GLFW_KEY_N) == GLFW_PRESS) {
+		if (mouseCaptured) {
+			window.setCursorCaptured(false);
+			mouseCaptured = false;
+		}
+	}
+
 
     if (glfwGetKey(glfwWin, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(glfwWin, true);
