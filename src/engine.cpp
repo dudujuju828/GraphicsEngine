@@ -112,6 +112,9 @@ void Engine::run() {
 		model.useProgram();
         model.setMat4("view", view);
         model.setMat4("projection", projection);
+		model.setVec3("lightDir", glm::vec3(-0.5f,-1.0f,-0.3f));	
+		model.setVec3("lightColor", glm::vec3(1.0f,1.0f,1.0f));	
+		model.setVec3("objectColor", glm::vec3(0.9f,0.8f,0.7f));	
 		modelObject.draw(model);
 	
         window.swapBuffers();
