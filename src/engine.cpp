@@ -4,12 +4,14 @@
 #include "../include/engine.hpp"
 #include "../include/object.hpp"
 #include "../include/shader.hpp"
+#include "../include/terrain.hpp"
 
 #include <string_view>
 #include <filesystem>
 #include <vector>
 
 #include "imgui.h"
+#include "../external/PerlinNoise/PerlinNoise.hpp"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
@@ -59,53 +61,47 @@ void Engine::processMouse() {
 }
 
 void Engine::run() {
+    GLFWwindow* glfwWin = window.getHandle();
 
-	/*IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(window.getHandle(), true);
-	ImGui_ImplOpenGL3_Init("#version 330");
-	static bool show_wireframe = false;
-	*/
-	Shader shader("src/vertex_s.glsl","src/fragment_s.glsl");
-	Object triangle("src/triangle.obj");
+    Shader shader("src/vertex_s.glsl", "src/fragment_s.glsl");
 
-	lastFrameTime = static_cast<float>(glfwGetTime());
+    const siv::PerlinNoise::seed_type seed = 123456u;
+    siv::PerlinNoise perlin{ seed };
 
-	
-	while (window.isOpen()) {
-		float currentTime = static_cast<float>(glfwGetTime());
-		float deltaTime = currentTime - lastFrameTime;
-		lastFrameTime = currentTime;
-		
-		window.pollEvents();
-		processInput(deltaTime);
-		processMouse();
+    Mesh terrainMesh = createTerrainMesh(
+        200, 200,        // xSegments, zSegments
+        100.0f, 100.0f,  // sizeX, sizeZ
+        perlin,
+        0.03,            // frequency
+        6,               // octaves
+        5.0f             // amplitude
+    );
 
+    Object terrain{ std::move(terrainMesh) };
+    terrain.transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
 
-		window.setColor(0.0f,0.5f,0.5f);
-		shader.useProgram();
-		
-		shader.setMat4("view", camera.getViewMatrix());
-		shader.setMat4("projection", camera.getProjectionMatrix());
+    lastFrameTime = static_cast<float>(glfwGetTime());
 
-		triangle.draw(shader);
+    while (!glfwWindowShouldClose(glfwWin)) {
+        float currentTime = static_cast<float>(glfwGetTime());
+        float deltaTime   = currentTime - lastFrameTime;
+        lastFrameTime     = currentTime;
 
-		window.swapBuffers();
+        window.pollEvents();
+        processInput(deltaTime);
+        processMouse();
 
-		/*ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-		ImGui::Begin("Hello, ImGui");
-		ImGui::Checkbox("Wireframe", &show_wireframe);
-		ImGui::Text("If you see this, ImGui is working.");
-		ImGui::End();
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		*/	
-	}
+        window.setColor(0.1f, 0.1f, 0.15f);
+
+        shader.useProgram();
+        shader.setMat4("view", camera.getViewMatrix());
+        shader.setMat4("projection", camera.getProjectionMatrix());
+
+        terrain.draw(shader);
+
+        window.swapBuffers();
+    }
 }
-
 
 void Engine::processInput(float deltaTime) {
     GLFWwindow* glfwWin = window.getHandle();

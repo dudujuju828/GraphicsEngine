@@ -1,5 +1,6 @@
 
 #include "../include/object.hpp"
+#include "../include/mesh.hpp"
 #include "../include/shader.hpp"
 #include <filesystem>
 #include <spdlog/spdlog.h>
@@ -9,6 +10,10 @@
 
 Object::Object(std::filesystem::path mesh_path) : mesh(mesh_path) {
 	spdlog::info("Created mesh object from obj at {}.",mesh_path.string());
+}
+
+Object::Object(Mesh&& mesh_) : mesh(std::move(mesh_)) {
+	spdlog::info("Created object from procedural mesh.");
 }
 
 void Object::draw(Shader& shader) {

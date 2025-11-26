@@ -23,6 +23,6 @@ add_library(imgui
 target_include_directories(imgui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backend)
 
 add_executable(main src/main.cpp src/engine.cpp src/window.cpp src/shader.cpp src/mesh.cpp src/glad.c src/object.cpp
-					src/camera.cpp)
+					src/camera.cpp src/terrain.cpp)
 target_include_directories(main PRIVATE include/ ${GLM_DIR})
 target_link_libraries(main spdlog fmt glfw imgui)

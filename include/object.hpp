@@ -18,11 +18,13 @@ struct Transform {
 class Object {
 	public:
 	Object(std::filesystem::path mesh_path);
-	Mesh mesh;
+	Object(Mesh&& mesh);
 	Transform transform;
 	
 	void draw(Shader& shader);
 	void setScale(glm::vec3 scale);
+	private:
+	Mesh mesh;
 };
 
 #endif
