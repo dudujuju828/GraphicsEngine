@@ -1,14 +1,13 @@
-
 #include "../include/glad/glad.h"
 #include "../include/mesh.hpp"
 #include "../include/engine.hpp"
 #include "../include/object.hpp"
 #include "../include/shader.hpp"
 #include "../include/terrain.hpp"
+#include "../include/grass.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/stb_image.h"
-
 
 #include <string_view>
 #include <filesystem>
@@ -34,12 +33,10 @@ Engine::Engine(std::string_view title) : window(title), camera(glm::vec3(0.0f, 0
     lastMouseX = static_cast<float>(xpos);
     lastMouseY = static_cast<float>(ypos);
     firstMouse = false;
-
 }
 
 void Engine::processMouse() {
-	
-	if (!mouseCaptured) return;
+    if (!mouseCaptured) return;
 
     GLFWwindow* glfwWin = window.getHandle();
 
@@ -57,7 +54,7 @@ void Engine::processMouse() {
     }
 
     float xoffset = xpos - lastMouseX;
-    float yoffset = lastMouseY - ypos; // reversed: y goes down in screen coords
+    float yoffset = lastMouseY - ypos;
 
     lastMouseX = xpos;
     lastMouseY = ypos;
@@ -70,104 +67,149 @@ void Engine::run() {
 
     Shader shader("src/vertex_s.glsl", "src/fragment_s.glsl");
     Shader model("src/model_vs.glsl", "src/model_fs.glsl");
+    Shader grassShader("src/grass_vs.glsl", "src/grass_fs.glsl");
 
     const siv::PerlinNoise::seed_type seed = 123456u;
     siv::PerlinNoise perlin{ seed };
 
-	float terrainAmplitude = 5.0f;
+    unsigned int terrainXSegments = 200;
+    unsigned int terrainZSegments = 200;
+    float terrainSizeX = 100.0f;
+    float terrainSizeZ = 100.0f;
+    double terrainFrequency = 0.02;
+    int terrainOctaves = 4;
+    float terrainAmplitude = 5.0f;
+
     Mesh terrainMesh = createTerrainMesh(
-        200, 200,        // xSegments, zSegments
-        100.0f, 100.0f,  // sizeX, sizeZ
+        terrainXSegments,
+        terrainZSegments,
+        terrainSizeX,
+        terrainSizeZ,
         perlin,
-        0.02,            // frequency
-        4,               // octaves
-        terrainAmplitude             // amplitude
+        terrainFrequency,
+        terrainOctaves,
+        terrainAmplitude
     );
 
     Object terrain{ std::move(terrainMesh) };
     terrain.transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    std::filesystem::path modelPath = "assets/models/bunny.obj"; 
-    Object modelObject{modelPath};  	
+    std::filesystem::path modelPath = "assets/models/bunny.obj";
+    Object modelObject{modelPath};
 
-	glEnable(GL_DEPTH_TEST);
+    GrassField grass;
+    glm::vec2 xRange(-terrainSizeX * 0.5f, terrainSizeX * 0.5f);
+    glm::vec2 zRange(-terrainSizeZ * 0.5f, terrainSizeZ * 0.5f);
+    auto sampleHeight = [&](float x, float z) -> float {
+        float u = (x / terrainSizeX) + 0.5f;
+        float v = (z / terrainSizeZ) + 0.5f;
+        float gx = u * static_cast<float>(terrainXSegments);
+        float gz = v * static_cast<float>(terrainZSegments);
+        double nx = static_cast<double>(gx) * terrainFrequency;
+        double nz = static_cast<double>(gz) * terrainFrequency;
+        double h = perlin.octave2D_01(nx, nz, terrainOctaves);
+        h = h * 2.0 - 1.0;
+        return static_cast<float>(h * terrainAmplitude);
+    };
+    grass.init(15000, xRange, zRange, sampleHeight);
+
+    glEnable(GL_DEPTH_TEST);
     lastFrameTime = static_cast<float>(glfwGetTime());
+	unsigned int terrainTex;
+	glGenTextures(1, &terrainTex);
+	glBindTexture(GL_TEXTURE_2D, terrainTex);
 
-	/*ENCAPSULATE SOMEWHERHE ELSE - DONT FORGET */
-	unsigned int grassTex;
-    glGenTextures(1, &grassTex);
-    glBindTexture(GL_TEXTURE_2D, grassTex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* data = stbi_load("assets/textures/grass.jpg", &width, &height, &nrChannels, 0);
+	if (data) {
+		GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	stbi_image_free(data);
 
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("assets/textures/grass.jpg", &width, &height, &nrChannels, 0);
-    if (data) {
-        GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
-                     format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    stbi_image_free(data);
+	unsigned int grassBladeTex;
+	glGenTextures(1, &grassBladeTex);
+	glBindTexture(GL_TEXTURE_2D, grassBladeTex);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	data = stbi_load("assets/textures/grass_blade.png", &width, &height, &nrChannels, 0);
+	if (data) {
+		GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	stbi_image_free(data);
+
 
     while (!glfwWindowShouldClose(glfwWin)) {
         float currentTime = static_cast<float>(glfwGetTime());
-        float deltaTime   = currentTime - lastFrameTime;
-        lastFrameTime     = currentTime;
+        float deltaTime = currentTime - lastFrameTime;
+        lastFrameTime = currentTime;
 
         window.pollEvents();
         processInput(deltaTime);
         processMouse();
 
         window.setColor(0.1f, 0.1f, 0.15f);
-	
-		glm::mat4 projection = camera.getProjectionMatrix();
-		glm::mat4 view = camera.getViewMatrix();
+
+        glm::mat4 projection = camera.getProjectionMatrix();
+        glm::mat4 view = camera.getViewMatrix();
 
         shader.useProgram();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, grassTex);
-		shader.setInt("uGrassTexture",0);
-		shader.setFloat("uTexScale", 0.1f);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, terrainTex);
+        shader.setInt("uGrassTexture", 0);
+        shader.setFloat("uTexScale", 0.1f);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
-		shader.setFloat("uMinHeight", -terrainAmplitude);
-		shader.setFloat("uMaxHeight", terrainAmplitude);
+        shader.setFloat("uMinHeight", -terrainAmplitude);
+        shader.setFloat("uMaxHeight", terrainAmplitude);
         terrain.draw(shader);
 
-		model.useProgram();
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glDisable(GL_CULL_FACE);
+        grass.draw(grassShader, view, projection, currentTime, grassBladeTex);
+        //glEnable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
+
+        model.useProgram();
         model.setMat4("view", view);
         model.setMat4("projection", projection);
-		model.setVec3("lightDir", glm::vec3(-0.5f,-1.0f,-0.3f));	
-		model.setVec3("lightColor", glm::vec3(1.0f,1.0f,1.0f));	
-		model.setVec3("objectColor", glm::vec3(0.9f,0.8f,0.7f));	
-		//modelObject.draw(model);
-	
+        model.setVec3("lightDir", glm::vec3(-0.5f, -1.0f, -0.3f));
+        model.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        model.setVec3("objectColor", glm::vec3(0.9f, 0.8f, 0.7f));
         window.swapBuffers();
     }
 }
 
 void Engine::processInput(float deltaTime) {
     GLFWwindow* glfwWin = window.getHandle();
-	
-	if (glfwGetKey(glfwWin, GLFW_KEY_M) == GLFW_PRESS) {
-		if (!mouseCaptured) {
-			window.setCursorCaptured(true);
-			mouseCaptured = true;
-			firstMouse = true; // recenter offsets next time
-		}
-	}
-	if (glfwGetKey(glfwWin, GLFW_KEY_N) == GLFW_PRESS) {
-		if (mouseCaptured) {
-			window.setCursorCaptured(false);
-			mouseCaptured = false;
-		}
-	}
 
+    if (glfwGetKey(glfwWin, GLFW_KEY_M) == GLFW_PRESS) {
+        if (!mouseCaptured) {
+            window.setCursorCaptured(true);
+            mouseCaptured = true;
+            firstMouse = true;
+        }
+    }
+    if (glfwGetKey(glfwWin, GLFW_KEY_N) == GLFW_PRESS) {
+        if (mouseCaptured) {
+            window.setCursorCaptured(false);
+            mouseCaptured = false;
+        }
+    }
 
     if (glfwGetKey(glfwWin, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(glfwWin, true);
