@@ -80,9 +80,9 @@ void Engine::run() {
 
 	/* setting up imgui end */
 
-    Shader shader("src/vertex_s.glsl", "src/fragment_s.glsl");
-    Shader model("src/model_vs.glsl", "src/model_fs.glsl");
-    Shader grassShader("src/grass_vs.glsl", "src/grass_fs.glsl");
+    Shader shader("assets/shaders/vertex/vertex_s.glsl", "assets/shaders/fragment/fragment_s.glsl");
+    Shader model("assets/shaders/vertex/model_vs.glsl", "assets/shaders/fragment/model_fs.glsl");
+    Shader grassShader("assets/shaders/vertex/grass_vs.glsl", "assets/shaders/fragment/grass_fs.glsl");
 
     const siv::PerlinNoise::seed_type seed = 123456u;
     siv::PerlinNoise perlin{ seed };
