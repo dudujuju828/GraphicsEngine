@@ -91,6 +91,12 @@ void Shader::setFloat(std::string_view name, float value) {
 	glUniform1f(location,value);
 }
 
+void Shader::setInt(std::string_view name, int value) {
+	GLint location = glGetUniformLocation(programID, name.data());
+	glUniform1i(location,value);
+}
+
+
 std::string Shader::loadFromFile(const std::filesystem::path path) {
 
 	spdlog::info("File at {} is being read into string.",path.string());	

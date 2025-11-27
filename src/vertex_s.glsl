@@ -4,15 +4,17 @@ layout (location = 0) in vec3 aPos;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform float uTexScale; 
 
-out float vHeight;   // pass height to fragment shader
+out float vHeight;
+out vec2 TexCoord;
 
 void main() {
-    // world-space position
     vec4 worldPos = model * vec4(aPos, 1.0);
 
-    // height is the y-component of world position
     vHeight = worldPos.y;
+
+    TexCoord = worldPos.xz * uTexScale;
 
     gl_Position = projection * view * worldPos;
 }

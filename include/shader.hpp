@@ -25,6 +25,7 @@ public:
 	void setVec3(std::string_view name, glm::vec3 value);
 	void setMat4(std::string_view name, glm::mat4 value);
 	void setFloat(std::string_view name, float value);
+	void setInt(std::string_view name, int value);
 	
 
 };

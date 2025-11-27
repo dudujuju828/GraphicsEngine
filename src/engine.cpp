@@ -6,6 +6,10 @@
 #include "../include/shader.hpp"
 #include "../include/terrain.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "../include/stb_image.h"
+
+
 #include <string_view>
 #include <filesystem>
 #include <vector>
@@ -30,6 +34,7 @@ Engine::Engine(std::string_view title) : window(title), camera(glm::vec3(0.0f, 0
     lastMouseX = static_cast<float>(xpos);
     lastMouseY = static_cast<float>(ypos);
     firstMouse = false;
+
 }
 
 void Engine::processMouse() {
@@ -74,8 +79,8 @@ void Engine::run() {
         200, 200,        // xSegments, zSegments
         100.0f, 100.0f,  // sizeX, sizeZ
         perlin,
-        0.03,            // frequency
-        6,               // octaves
+        0.02,            // frequency
+        4,               // octaves
         terrainAmplitude             // amplitude
     );
 
@@ -87,6 +92,27 @@ void Engine::run() {
 
 	glEnable(GL_DEPTH_TEST);
     lastFrameTime = static_cast<float>(glfwGetTime());
+
+	/*ENCAPSULATE SOMEWHERHE ELSE - DONT FORGET */
+	unsigned int grassTex;
+    glGenTextures(1, &grassTex);
+    glBindTexture(GL_TEXTURE_2D, grassTex);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load("assets/textures/grass.jpg", &width, &height, &nrChannels, 0);
+    if (data) {
+        GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
+                     format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    stbi_image_free(data);
 
     while (!glfwWindowShouldClose(glfwWin)) {
         float currentTime = static_cast<float>(glfwGetTime());
@@ -103,6 +129,10 @@ void Engine::run() {
 		glm::mat4 view = camera.getViewMatrix();
 
         shader.useProgram();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, grassTex);
+		shader.setInt("uGrassTexture",0);
+		shader.setFloat("uTexScale", 0.1f);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
 		shader.setFloat("uMinHeight", -terrainAmplitude);
@@ -115,7 +145,7 @@ void Engine::run() {
 		model.setVec3("lightDir", glm::vec3(-0.5f,-1.0f,-0.3f));	
 		model.setVec3("lightColor", glm::vec3(1.0f,1.0f,1.0f));	
 		model.setVec3("objectColor", glm::vec3(0.9f,0.8f,0.7f));	
-		modelObject.draw(model);
+		//modelObject.draw(model);
 	
         window.swapBuffers();
     }
