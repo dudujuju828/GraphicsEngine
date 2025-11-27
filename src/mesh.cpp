@@ -49,6 +49,12 @@ Mesh::Mesh(const std::vector<float>& positions)
     initBuffers(positions, nullptr);
 }
 
+Mesh::Mesh(const std::vector<float>& positions,
+           const std::vector<float>& normals)
+{
+    initBuffers(positions, &normals);
+}
+
 Mesh::Mesh(const std::filesystem::path& objfile_path)
 {
     spdlog::info("Loading mesh with Assimp from {}", objfile_path.string());

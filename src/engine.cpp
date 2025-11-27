@@ -18,7 +18,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
-Engine::Engine(std::string_view title) : window(title), camera(glm::vec3(0.0f, 0.0f, 3.0f)) {
+Engine::Engine(std::string_view title) : window(title), camera(glm::vec3(0.0f, 8.0f, 0.0f)) {
     GLFWwindow* glfwWin = window.getHandle();
 
     int width, height;
@@ -76,7 +76,7 @@ void Engine::run() {
     unsigned int terrainZSegments = 200;
     float terrainSizeX = 100.0f;
     float terrainSizeZ = 100.0f;
-    double terrainFrequency = 0.02;
+    double terrainFrequency = 0.04f;
     int terrainOctaves = 4;
     float terrainAmplitude = 5.0f;
 
@@ -97,20 +97,23 @@ void Engine::run() {
     std::filesystem::path modelPath = "assets/models/bunny.obj";
     Object modelObject{modelPath};
 
+    std::filesystem::path treePath = "assets/models/tree.obj";
+    Object treeObject{treePath};
+	treeObject.setScale(glm::vec3(0.4f));
+	treeObject.setPosition(glm::vec3(-20.0f,0.0f,20.0f));
+
     GrassField grass;
     glm::vec2 xRange(-terrainSizeX * 0.5f, terrainSizeX * 0.5f);
     glm::vec2 zRange(-terrainSizeZ * 0.5f, terrainSizeZ * 0.5f);
-    auto sampleHeight = [&](float x, float z) -> float {
-        float u = (x / terrainSizeX) + 0.5f;
-        float v = (z / terrainSizeZ) + 0.5f;
-        float gx = u * static_cast<float>(terrainXSegments);
-        float gz = v * static_cast<float>(terrainZSegments);
-        double nx = static_cast<double>(gx) * terrainFrequency;
-        double nz = static_cast<double>(gz) * terrainFrequency;
-        double h = perlin.octave2D_01(nx, nz, terrainOctaves);
-        h = h * 2.0 - 1.0;
-        return static_cast<float>(h * terrainAmplitude);
-    };
+	auto sampleHeight = [&](float xWorld, float zWorld) -> float {
+		double nx = static_cast<double>(xWorld) * terrainFrequency;
+		double nz = static_cast<double>(zWorld) * terrainFrequency;
+		double h = perlin.octave2D_01(nx, nz, terrainOctaves);
+		h = h * 2.0 - 1.0;
+		return static_cast<float>(h * terrainAmplitude);
+	};
+
+
     grass.init(15000, xRange, zRange, sampleHeight);
 
     glEnable(GL_DEPTH_TEST);
@@ -161,7 +164,7 @@ void Engine::run() {
         processInput(deltaTime);
         processMouse();
 
-        window.setColor(0.1f, 0.1f, 0.15f);
+        window.setColor(0.361f, 0.6f, 1.0f);
 
         glm::mat4 projection = camera.getProjectionMatrix();
         glm::mat4 view = camera.getViewMatrix();
@@ -175,6 +178,9 @@ void Engine::run() {
         shader.setMat4("projection", projection);
         shader.setFloat("uMinHeight", -terrainAmplitude);
         shader.setFloat("uMaxHeight", terrainAmplitude);
+		shader.setVec3("uLightDir", glm::vec3(-0.5f, -1.0f, -0.3f));
+		shader.setVec3("uLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+		shader.setVec3("uAmbientColor", glm::vec3(0.25f, 0.3f, 0.35f));
         terrain.draw(shader);
 
         glEnable(GL_BLEND);
@@ -189,7 +195,8 @@ void Engine::run() {
         model.setMat4("projection", projection);
         model.setVec3("lightDir", glm::vec3(-0.5f, -1.0f, -0.3f));
         model.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        model.setVec3("objectColor", glm::vec3(0.9f, 0.8f, 0.7f));
+        model.setVec3("objectColor", glm::vec3(0.43f, 0.21f, 0.08f));
+		treeObject.draw(model);
         window.swapBuffers();
     }
 }

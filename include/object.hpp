@@ -23,6 +23,7 @@ class Object {
 	
 	void draw(Shader& shader);
 	void setScale(glm::vec3 scale);
+	void setPosition(glm::vec3 position);
 	private:
 	Mesh mesh;
 };

@@ -16,6 +16,7 @@ Object::Object(Mesh&& mesh_) : mesh(std::move(mesh_)) {
 	spdlog::info("Created object from procedural mesh.");
 }
 
+
 void Object::draw(Shader& shader) {
     glm::mat4 model(1.0f);
     model = glm::translate(model, transform.position);
@@ -33,4 +34,8 @@ void Object::draw(Shader& shader) {
 
 void Object::setScale(glm::vec3 scale) {
 	transform.scale = scale;
+}
+
+void Object::setPosition(glm::vec3 position) {
+	transform.position = position;
 }
