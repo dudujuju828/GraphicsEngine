@@ -87,10 +87,11 @@ void Engine::run() {
     const siv::PerlinNoise::seed_type seed = 123456u;
     siv::PerlinNoise perlin{ seed };
 
-    unsigned int terrainXSegments = 200;
-    unsigned int terrainZSegments = 200;
-    float terrainSizeX = 100.0f;
-    float terrainSizeZ = 100.0f;
+    unsigned int scale = 2;
+    unsigned int terrainXSegments = 200 * scale;
+    unsigned int terrainZSegments = 200 * scale;
+    float terrainSizeX = 100.0f * scale;
+    float terrainSizeZ = 100.0f * scale;
     double terrainFrequency = 0.04f;
     int terrainOctaves = 4;
     float terrainAmplitude = 5.0f;
@@ -109,13 +110,16 @@ void Engine::run() {
     Object terrain{ std::move(terrainMesh) };
     terrain.transform.position = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    std::filesystem::path modelPath = "assets/models/bunny.obj";
-    Object modelObject{modelPath};
+    std::filesystem::path bunnyPath = "assets/models/bunny.obj";
+    Object bunnyObject{bunnyPath};
 
     std::filesystem::path treePath = "assets/models/tree.obj";
     Object treeObject{treePath};
 	treeObject.setScale(glm::vec3(0.4f));
-	treeObject.setPosition(glm::vec3(-20.0f,0.0f,20.0f));
+
+    std::filesystem::path swordPath = "assets/models/sword_dom/scene.gltf";
+    Object swordObject{swordPath};
+
 
     GrassField grass;
     glm::vec2 xRange(-terrainSizeX * 0.5f, terrainSizeX * 0.5f);
@@ -256,6 +260,11 @@ void Engine::run() {
         model.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
         model.setVec3("objectColor", glm::vec3(0.43f, 0.21f, 0.08f));
 		treeObject.draw(model);
+        for (int i = 0; i < 20; i ++) {
+            treeObject.setPosition(glm::vec3(0.0f,0.0f,static_cast<float>(i)*20.0f));
+		    treeObject.draw(model);
+        }
+
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -296,4 +305,3 @@ void Engine::processInput(float deltaTime) {
     if (glfwGetKey(glfwWin, GLFW_KEY_D) == GLFW_PRESS)
         camera.processKeyboard(CameraMovement::Right, deltaTime);
 }
-

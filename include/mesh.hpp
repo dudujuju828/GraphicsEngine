@@ -17,6 +17,7 @@ private:
                      const std::vector<float>* normals);
 
 public:
+    ~Mesh();
     Mesh(const std::filesystem::path& objfile_path);
 
     Mesh(const std::vector<float>& positions);

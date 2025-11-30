@@ -11,6 +11,12 @@
 #include <stdexcept>
 #include <vector>
 
+/*
+   * Initiailize buffers from vectors containing positions and normals,
+   * is to be used internally in constructors. VAO and VBO handles stored
+   * as internal members. Vertex count is also stored as needed for drawing
+   * the mesh.
+*/
 void Mesh::initBuffers(const std::vector<float>& positions,
                        const std::vector<float>* normals)
 {
@@ -44,6 +50,11 @@ void Mesh::initBuffers(const std::vector<float>& positions,
     vertexCount = static_cast<int>(positions.size() / 3);
 }
 
+/*
+    * Constructors for when positions of a mesh and (if present) normals
+    * of the object are available.
+*/
+
 Mesh::Mesh(const std::vector<float>& positions)
 {
     initBuffers(positions, nullptr);
@@ -55,6 +66,18 @@ Mesh::Mesh(const std::vector<float>& positions,
     initBuffers(positions, &normals);
 }
 
+/*
+    * Read in an object from path object. C++ 17 needed.
+    * Triangulate converts all faces to triangles.
+    * JoinIdenticalVertices merges any duplicates for efficiency.
+    * GenSmoothNormals generates per-vertex normals if they are missing.
+        * Also,
+        * Computes smooth shading
+    * ImproveCacheLocality, reorders the order of faces and vertex/index buffers
+      to improve cache locality. Does not change geometry, uses cache-optimisation heuristic.
+    * SortByPType splits and sorts meshes by primitive type, so aiMesh will only contain primitives
+      of one type. As its combined with triangulate, will be triangles.
+*/
 Mesh::Mesh(const std::filesystem::path& objfile_path)
 {
     spdlog::info("Loading mesh with Assimp from {}", objfile_path.string());
@@ -75,55 +98,129 @@ Mesh::Mesh(const std::filesystem::path& objfile_path)
         throw std::runtime_error("Failed to load mesh with Assimp: " + objfile_path.string());
     }
 
-    const aiMesh* mesh = scene->mMeshes[0];
+    // First pass: count triangles and decide what to do with normals.
+    std::size_t totalTriangles = 0;
 
-    if (!mesh->HasPositions()) {
-        spdlog::error("Mesh {} has no vertex positions.", objfile_path.string());
-        throw std::runtime_error("Mesh has no vertex positions: " + objfile_path.string());
+    bool anyMeshHasNormals      = false;
+    bool anyMeshMissingNormals  = false;
+
+    for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+        const aiMesh* mesh = scene->mMeshes[m];
+
+        if (!mesh->HasPositions()) {
+            spdlog::warn("Sub-mesh {} in {} has no vertex positions; skipping.",
+                         m, objfile_path.string());
+            continue;
+        }
+
+        // We only care about triangle meshes.
+        unsigned int meshTriangles = 0;
+        for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+            const aiFace& face = mesh->mFaces[i];
+            if (face.mNumIndices == 3) {
+                ++meshTriangles;
+            }
+        }
+
+        if (meshTriangles == 0) {
+            spdlog::warn("Sub-mesh {} in {} has no triangle faces; skipping.",
+                         m, objfile_path.string());
+            continue;
+        }
+
+        totalTriangles += meshTriangles;
+
+        if (mesh->HasNormals())
+            anyMeshHasNormals = true;
+        else
+            anyMeshMissingNormals = true;
+    }
+
+    if (totalTriangles == 0) {
+        spdlog::error("No triangle geometry found in scene for {}", objfile_path.string());
+        throw std::runtime_error("Scene has no triangle geometry: " + objfile_path.string());
+    }
+
+    // Consistent rule: either we use normals for all vertices, or we drop them.
+    bool useNormals = anyMeshHasNormals && !anyMeshMissingNormals;
+    if (!useNormals && anyMeshHasNormals) {
+        spdlog::warn("Some sub-meshes in {} have normals and some do not; "
+                     "dropping normals for consistency.",
+                     objfile_path.string());
     }
 
     std::vector<float> positions;
     std::vector<float> normals;
-    positions.reserve(mesh->mNumFaces * 3u * 3u);
-    normals.reserve(mesh->mNumFaces * 3u * 3u);
 
-    bool hasAssimpNormals = mesh->HasNormals();
-
-    for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
-        const aiFace& face = mesh->mFaces[i];
-
-        if (face.mNumIndices != 3) continue;
-
-        for (unsigned int j = 0; j < 3; ++j) {
-            unsigned int idx = face.mIndices[j];
-
-            const aiVector3D& v = mesh->mVertices[idx];
-            positions.push_back(v.x);
-            positions.push_back(v.y);
-            positions.push_back(v.z);
-
-            if (hasAssimpNormals) {
-                const aiVector3D& n = mesh->mNormals[idx];
-                normals.push_back(n.x);
-                normals.push_back(n.y);
-                normals.push_back(n.z);
-            }
-        }
-
+    positions.reserve(totalTriangles * 3u * 3u); // triangles * 3 verts * 3 components
+    if (useNormals) {
+        normals.reserve(totalTriangles * 3u * 3u);
     }
 
-    spdlog::info("Loaded mesh {}: {} vertices.",
-                 objfile_path.string(), positions.size() / 3);
+    // Second pass: actually copy all triangle vertices (and normals, if used).
+    for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+        const aiMesh* mesh = scene->mMeshes[m];
 
-    std::vector<float>* normalsPtr = hasAssimpNormals ? &normals : nullptr;
+        if (!mesh->HasPositions())
+            continue; // already warned above
+
+        // Skip non-triangle-only meshes if they somehow slipped through.
+        if (!(mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE)) {
+            spdlog::warn("Skipping non-triangle sub-mesh {} in {}", m, objfile_path.string());
+            continue;
+        }
+
+        for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+            const aiFace& face = mesh->mFaces[i];
+
+            if (face.mNumIndices != 3)
+                continue; // should not happen after aiProcess_Triangulate, but be safe
+
+            for (unsigned int j = 0; j < 3; ++j) {
+                unsigned int idx = face.mIndices[j];
+
+                const aiVector3D& v = mesh->mVertices[idx];
+                positions.push_back(v.x);
+                positions.push_back(v.y);
+                positions.push_back(v.z);
+
+                if (useNormals) {
+                    const aiVector3D& n = mesh->mNormals[idx];
+                    normals.push_back(n.x);
+                    normals.push_back(n.y);
+                    normals.push_back(n.z);
+                }
+            }
+        }
+    }
+
+    spdlog::info("Loaded mesh {}: {} vertices from {} sub-meshes.",
+                 objfile_path.string(), positions.size() / 3, scene->mNumMeshes);
+
+    std::vector<float>* normalsPtr = useNormals ? &normals : nullptr;
     initBuffers(positions, normalsPtr);
 }
 
+
+Mesh::~Mesh() {
+    if (VAO) glDeleteVertexArrays(1,&VAO);
+    if (VBO) glDeleteBuffers(1,&VBO);
+    if (NBO) glDeleteBuffers(1,&NBO);
+}
+
+/*
+    * Bind the vertex array to the current context. Called internally
+      when drawing.
+*/
 void Mesh::use()
 {
     glBindVertexArray(VAO);
 }
 
+/*
+    * Draw the mesh. Currently only draw arrays is supported which is inefficient.
+    * Need to add indexed draws.
+*/
 void Mesh::draw()
 {
     use();
