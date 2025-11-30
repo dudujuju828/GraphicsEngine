@@ -72,9 +72,9 @@ void Engine::run() {
     ImGuiIO& io = ImGui::GetIO(); (void)io; 
 
     ImGui::StyleColorsDark();
-	io.FontGlobalScale = 6.0f;            
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.ScaleAllSizes(3.0f);
+	//io.FontGlobalScale = 6.0f;            
+	//ImGuiStyle& style = ImGui::GetStyle();
+	//style.ScaleAllSizes(3.0f);
     ImGui_ImplGlfw_InitForOpenGL(glfwWin, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
@@ -202,7 +202,7 @@ void Engine::run() {
 			frameCount = 0;
 		}	
 
-		ImVec2 newWindowSize = ImVec2(1500, 600);  // Set the width to 500 and height to 300
+		ImVec2 newWindowSize = ImVec2(500, 300);  // Set the width to 500 and height to 300
 		ImGui::SetNextWindowSize(newWindowSize, ImGuiCond_Always);
 
         ImGui::Begin("Stats");
