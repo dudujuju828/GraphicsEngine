@@ -1,9 +1,6 @@
 ## Demonstrations
 ### Object Loading
-<video src="media/grass.mp4" autoplay loop muted playsinline controls>
-  Your browser does not support the video tag.
-</video>
-
+![Grass demo](media/grass.gif)
 ![alt-text](media/demo_landscape_gd.png)
 
 ### Perlin Noise
