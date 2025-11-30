@@ -1,6 +1,6 @@
 ## Demonstrations
 ### Object Loading
-![alt-text](media/grass.mp4)
+[Grass-demo](media/grass.mp4)
 ![alt-text](media/demo_landscape_gd.png)
 ### Perlin Noise
 ![alt-text](media/perlinnoise.png)
