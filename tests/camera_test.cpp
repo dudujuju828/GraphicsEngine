@@ -1,59 +1,50 @@
 // camera_test.cpp
 #include <gtest/gtest.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "camera.hpp"
 
-// 1) Check that yaw/pitch produce a sensible orientation and an orthonormal basis.
-TEST(CameraTest, OrientationFromYawPitch) {
-    Camera cam(
-        glm::vec3(0.0f, 0.0f, 0.0f),   // starts at origin
-        glm::vec3(0.0f, 1.0f, 0.0f),   // world up
-        0.0f,                          // yaw
-        0.0f,                          // pitch
-        45.0f,                         // fov
-        0.1f,                          // near
-        100.0f                         // far
-    );
+// 1) Basic sanity check: view matrix should put the camera at the origin in view space.
+TEST(CameraTest, ViewMatrixPutsCameraAtOrigin) {
+    Camera cam;  // uses your default constructor
 
-    // With yaw=0, pitch=0, this implementation should look roughly along +X.
-    EXPECT_NEAR(cam.front.x, 1.0f, 1e-4f);
-    EXPECT_NEAR(cam.front.y, 0.0f, 1e-4f);
-    EXPECT_NEAR(cam.front.z, 0.0f, 1e-4f);
+    glm::mat4 view = cam.getViewMatrix();
 
-    // The camera basis vectors should be unit length.
-    EXPECT_NEAR(glm::length(cam.front), 1.0f, 1e-4f);
-    EXPECT_NEAR(glm::length(cam.right), 1.0f, 1e-4f);
-    EXPECT_NEAR(glm::length(cam.up),    1.0f, 1e-4f);
+    // Transform the camera position into view space.
+    glm::vec4 camPosWS(cam.getPosition(), 1.0f);
+    glm::vec4 camPosVS = view * camPosWS;
 
-    // And they should all be perpendicular to each other.
-    EXPECT_NEAR(glm::dot(cam.front, cam.right), 0.0f, 1e-4f);
-    EXPECT_NEAR(glm::dot(cam.front, cam.up),    0.0f, 1e-4f);
-    EXPECT_NEAR(glm::dot(cam.right, cam.up),    0.0f, 1e-4f);
+    // In view space, the camera should sit at the origin.
+    EXPECT_NEAR(camPosVS.x, 0.0f, 1e-4f);
+    EXPECT_NEAR(camPosVS.y, 0.0f, 1e-4f);
+    EXPECT_NEAR(camPosVS.z, 0.0f, 1e-4f);
+
+    // Optional: check that the world origin ends up in front of the camera (negative z).
+    glm::vec4 originWS(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 originVS = view * originWS;
+    EXPECT_LT(originVS.z, 0.0f);
 }
 
-// 2) Check that "move forward" actually moves along the front vector.
-TEST(CameraTest, MovesForwardAlongFront) {
-    Camera cam(
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f),
-        0.0f, 0.0f,
-        45.0f,
-        0.1f, 100.0f
-    );
+// 2) Moving forward should move the camera along its viewing direction,
+//    and the distance should match movementSpeed * deltaTime (15 * dt in your header).
+TEST(CameraTest, ForwardMovementChangesPositionAlongViewDirection) {
+    Camera cam;  // default position is (0, 0, 3) in your header
 
-    glm::vec3 start = cam.position;
+    glm::vec3 start = cam.getPosition();
 
-    float dt = 1.0f;  // pretend one second passed
+    float dt = 1.0f;  // pretend one second has passed
     cam.processKeyboard(CameraMovement::Forward, dt);
 
-    glm::vec3 delta = cam.position - start;
+    glm::vec3 end = cam.getPosition();
+    glm::vec3 delta = end - start;
 
     // It should have moved somewhere.
     EXPECT_GT(glm::length(delta), 0.0f);
 
-    // The movement direction should line up with the current front vector.
-    float cosAngle = glm::dot(glm::normalize(delta), glm::normalize(cam.front));
-    EXPECT_NEAR(cosAngle, 1.0f, 1e-3f);
+    // For the default yaw/pitch, movement should be purely along -Z.
+    EXPECT_NEAR(end.x, start.x, 1e-4f);
+    EXPECT_NEAR(end.y, start.y, 1e-4f);
+
+    // movementSpeed is 15.0f in the class, so |delta| should be ~15.
+    EXPECT_NEAR(glm::length(delta), 15.0f, 1e-3f);
 }
