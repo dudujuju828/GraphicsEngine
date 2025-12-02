@@ -86,14 +86,16 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 enable_testing()
+add_executable(camera_tests tests/camera_test.cpp src/camera.cpp)
+target_include_directories(camera_tests PRIVATE include ${GLM_DIR})
+target_link_libraries(camera_tests PRIVATE GTest::gtest_main)
+
+include(GoogleTest)
+gtest_discover_tests(camera_tests)
 
 target_link_libraries(main PRIVATE
     spdlog::spdlog_header_only   # header-only, no DLL
     glfw
     imgui
     assimp
-    GTest::gtest_main
 )
-
-#include(GoogleTest)
-#gtest_discover_tests()
