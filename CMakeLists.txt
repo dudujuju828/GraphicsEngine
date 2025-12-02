@@ -78,9 +78,22 @@ target_include_directories(main PRIVATE
     ${GLM_DIR}
 )
 
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG v1.15.0
+)
+FetchContent_MakeAvailable(googletest)
+enable_testing()
+
 target_link_libraries(main PRIVATE
     spdlog::spdlog_header_only   # header-only, no DLL
     glfw
     imgui
     assimp
+    GTest::gtest_main
 )
+
+#include(GoogleTest)
+#gtest_discover_tests()

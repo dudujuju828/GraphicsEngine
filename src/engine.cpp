@@ -87,7 +87,7 @@ void Engine::run() {
     const siv::PerlinNoise::seed_type seed = 123456u;
     siv::PerlinNoise perlin{ seed };
 
-    unsigned int scale = 2;
+    unsigned int scale = 8;
     unsigned int terrainXSegments = 200 * scale;
     unsigned int terrainZSegments = 200 * scale;
     float terrainSizeX = 100.0f * scale;
@@ -241,7 +241,7 @@ void Engine::run() {
         //glDisable(GL_CULL_FACE);
 		if (ImGui::SliderFloat("Grass Density", &grassDensity, 0.0f, 1.0f)) {
 			// Adjust grass density based on slider value
-			int newBladeCount = static_cast<int>(grassDensity * 1000000);  // Adjust scaling factor as needed
+			int newBladeCount = static_cast<int>(grassDensity * 100000);  // Adjust scaling factor as needed
 			grassBladeCount = newBladeCount;
 			grass.init(grassBladeCount, xRange, zRange, sampleHeight);  // Re-initialize grass with new blade count
 		}		
@@ -259,7 +259,6 @@ void Engine::run() {
         model.setVec3("lightDir", glm::vec3(-0.5f, -1.0f, -0.3f));
         model.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
         model.setVec3("objectColor", glm::vec3(0.43f, 0.21f, 0.08f));
-		treeObject.draw(model);
         for (int i = 0; i < 20; i ++) {
             treeObject.setPosition(glm::vec3(0.0f,0.0f,static_cast<float>(i)*20.0f));
 		    treeObject.draw(model);

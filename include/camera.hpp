@@ -20,7 +20,7 @@ public:
         float pitch        = 0.0f,
         float fov          = 45.0f,
         float nearPlane    = 0.1f,
-        float farPlane     = 100.0f
+        float farPlane     = 100000.0f
     );
 
     // Call when the window is created/resized
@@ -49,7 +49,7 @@ private:
     float farPlane;
     float aspectRatio;
 
-    float movementSpeed   = 5.0f;
+    float movementSpeed   = 15.0f;
     float mouseSensitivity = 0.1f;
 
     void updateCameraVectors();

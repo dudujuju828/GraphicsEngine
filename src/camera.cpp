@@ -28,7 +28,7 @@ glm::mat4 Camera::getProjectionMatrix() const {
 }
 
 void Camera::processKeyboard(CameraMovement dir, float deltaTime) {
-    float velocity = movementSpeed * deltaTime;
+    float velocity = movementSpeed * deltaTime; 
 
     if (dir == CameraMovement::Forward)
         position += front * velocity;
