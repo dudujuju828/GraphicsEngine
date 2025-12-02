@@ -10,7 +10,7 @@
 ### Clone and fetch submodules
 
 ```bash
-git clone <this-repo-url> GraphicsEngine
+git clone https://github.com/dudujuju828/GraphicsEngine.git GraphicsEngine
 cd GraphicsEngine
 git submodule update --init --recursive
 ```
