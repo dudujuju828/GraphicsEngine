@@ -57,6 +57,8 @@ All third-party libraries are built and linked statically, so no extra DLL setup
 ---
 
 ## Demonstrations
+### Youtube
+https://www.youtube.com/@maxthomarino
 
 ### Object Loading
 ![Grass demo](media/grass.gif)  
