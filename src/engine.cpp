@@ -135,6 +135,7 @@ void Engine::run() {
 
     glEnable(GL_DEPTH_TEST);
     lastFrameTime = static_cast<float>(glfwGetTime());
+    texture_manager.add("assets/textures/grass.jpg", "grass");
     /*
 	unsigned int terrainTex;
 	glGenTextures(1, &terrainTex);
@@ -224,6 +225,7 @@ void Engine::run() {
         shader.useProgram();
         //glActiveTexture(GL_TEXTURE0);
         //glBindTexture(GL_TEXTURE_2D, terrainTex);
+        texture_manager.use("grass",0);
         shader.setInt("uGrassTexture", 0);
         shader.setFloat("uTexScale", 0.1f);
         shader.setMat4("view", view);

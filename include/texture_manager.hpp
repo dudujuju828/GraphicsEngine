@@ -20,7 +20,8 @@ class TextureManager {
     public:
     TextureManager() = default;
 
-    void add(std::filesystem::path texture_path, std::string name);
+    void add(std::string texture_path, std::string name);
+    void use(const std::string& name, GLuint unit);
 
 
 };

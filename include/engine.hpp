@@ -4,12 +4,14 @@
 
 #include "window.hpp"
 #include "camera.hpp"
+#include "texture_manager.hpp"
 #include <string_view>
 
 class Engine {
 	private:
 	Window window;	
 	Camera camera;
+	TextureManager texture_manager;
 	float lastFrameTime = 0.0f;
 	void processInput(float deltaTime);
 
