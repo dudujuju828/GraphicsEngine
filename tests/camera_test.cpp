@@ -1,4 +1,7 @@
 // camera_test.cpp
+/*
+AI GENERATED TEST
+*/
 #include <gtest/gtest.h>
 #include <glm/glm.hpp>
 
