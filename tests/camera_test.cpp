@@ -29,9 +29,9 @@ TEST(CameraTest, ViewMatrixPutsCameraAtOrigin) {
 }
 
 // 2) Moving forward should move the camera along its viewing direction,
-//    and the distance should match movementSpeed * deltaTime (15 * dt in your header).
+//    and the distance should match movementSpeed * deltaTime (15 * dt in  header).
 TEST(CameraTest, ForwardMovementChangesPositionAlongViewDirection) {
-    Camera cam;  // default position is (0, 0, 3) in your header
+    Camera cam;  // default position is (0, 0, 3) in header
 
     glm::vec3 start = cam.getPosition();
 
