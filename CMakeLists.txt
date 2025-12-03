@@ -71,6 +71,7 @@ add_executable(main
     src/camera.cpp
     src/terrain.cpp
     src/grass.cpp
+    src/texture_manager.cpp
 )
 
 target_include_directories(main PRIVATE

@@ -6,9 +6,6 @@
 #include "../include/terrain.hpp"
 #include "../include/grass.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "../include/stb_image.h"
-
 #include <string_view>
 #include <filesystem>
 #include <vector>
@@ -138,6 +135,7 @@ void Engine::run() {
 
     glEnable(GL_DEPTH_TEST);
     lastFrameTime = static_cast<float>(glfwGetTime());
+    /*
 	unsigned int terrainTex;
 	glGenTextures(1, &terrainTex);
 	glBindTexture(GL_TEXTURE_2D, terrainTex);
@@ -173,6 +171,7 @@ void Engine::run() {
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	stbi_image_free(data);
+    */
 
 	glfwSwapInterval(0);
 
@@ -223,8 +222,8 @@ void Engine::run() {
         glm::mat4 view = camera.getViewMatrix();
 
         shader.useProgram();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, terrainTex);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, terrainTex);
         shader.setInt("uGrassTexture", 0);
         shader.setFloat("uTexScale", 0.1f);
         shader.setMat4("view", view);
@@ -245,7 +244,7 @@ void Engine::run() {
 			grassBladeCount = newBladeCount;
 			grass.init(grassBladeCount, xRange, zRange, sampleHeight);  // Re-initialize grass with new blade count
 		}		
-        grass.draw(grassShader, view, projection, currentTime, grassBladeTex);
+        //grass.draw(grassShader, view, projection, currentTime, grassBladeTex);
         //glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
 
