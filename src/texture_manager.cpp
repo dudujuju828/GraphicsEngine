@@ -38,3 +38,10 @@ void TextureManager::use(const std::string& name, GLuint unit) {
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(it->second.target, it->second.ID);
 }
+
+GLuint TextureManager::get(const std::string& name) {
+    auto it = texture_mappings.find(name);
+    if (it == texture_mappings.end()) return 0;
+
+    return it->second.ID;
+}

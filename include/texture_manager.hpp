@@ -22,6 +22,7 @@ class TextureManager {
 
     void add(std::string texture_path, std::string name);
     void use(const std::string& name, GLuint unit);
+    GLuint get(const std::string& name);
 
 
 };

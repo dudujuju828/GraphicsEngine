@@ -135,7 +135,8 @@ void Engine::run() {
 
     glEnable(GL_DEPTH_TEST);
     lastFrameTime = static_cast<float>(glfwGetTime());
-    texture_manager.add("assets/textures/grass.jpg", "grass");
+    texture_manager.add("assets/textures/grass.jpg", "terrain");
+    texture_manager.add("assets/textures/grass_blade.png", "grass");
     /*
 	unsigned int terrainTex;
 	glGenTextures(1, &terrainTex);
@@ -225,7 +226,7 @@ void Engine::run() {
         shader.useProgram();
         //glActiveTexture(GL_TEXTURE0);
         //glBindTexture(GL_TEXTURE_2D, terrainTex);
-        texture_manager.use("grass",0);
+        texture_manager.use("terrain",0);
         shader.setInt("uGrassTexture", 0);
         shader.setFloat("uTexScale", 0.1f);
         shader.setMat4("view", view);
@@ -246,7 +247,8 @@ void Engine::run() {
 			grassBladeCount = newBladeCount;
 			grass.init(grassBladeCount, xRange, zRange, sampleHeight);  // Re-initialize grass with new blade count
 		}		
-        //grass.draw(grassShader, view, projection, currentTime, grassBladeTex);
+        texture_manager.use("grass",1);
+        grass.draw(grassShader, view, projection, currentTime, texture_manager.get("grass"));
         //glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
 
