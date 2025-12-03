@@ -34,6 +34,7 @@ public:
 
     const glm::vec3& getPosition() const { return position; }
     float getFov() const { return fov; }
+    const glm::vec3 getFront() const { return front; }
 
 private:
     glm::vec3 position;

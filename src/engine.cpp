@@ -14,6 +14,46 @@
 #include "../external/PerlinNoise/PerlinNoise.hpp"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include <spdlog/spdlog.h>
+
+#include <optional>
+#include <filesystem>
+#include <nfd.h>
+std::optional<std::filesystem::path> open_model_dialog()
+{
+    if (NFD_Init() != NFD_OKAY) {
+        spdlog::error("NFD_Init failed: {}", NFD_GetError());
+        return std::nullopt;
+    }
+
+    nfdu8char_t* outPath = nullptr;
+
+    nfdu8filteritem_t filters[] = {
+        { "Model files", "obj,fbx,gltf,glb" }
+    };
+
+    nfdopendialogu8args_t args{};
+    args.filterList  = filters;
+    args.filterCount = 1;
+
+    std::optional<std::filesystem::path> resultPath;
+
+    nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
+    if (result == NFD_OKAY)
+    {
+        resultPath = std::filesystem::path(outPath);
+        spdlog::info("NFD selected path: {}", resultPath->string());
+        NFD_FreePathU8(outPath);
+    }
+    else if (result == NFD_ERROR)
+    {
+        spdlog::error("NFD error: {}", NFD_GetError());
+    }
+
+    NFD_Quit();
+    return resultPath;
+}
+
 
 Engine::Engine(std::string_view title) : window(title), camera(glm::vec3(0.0f, 8.0f, 0.0f)) {
     GLFWwindow* glfwWin = window.getHandle();
@@ -84,7 +124,7 @@ void Engine::run() {
     const siv::PerlinNoise::seed_type seed = 123456u;
     siv::PerlinNoise perlin{ seed };
 
-    unsigned int scale = 8;
+    unsigned int scale = 2;
     unsigned int terrainXSegments = 200 * scale;
     unsigned int terrainZSegments = 200 * scale;
     float terrainSizeX = 100.0f * scale;
@@ -130,13 +170,22 @@ void Engine::run() {
 	};
 
 
-	int grassBladeCount = 100000;
+	int grassBladeCount = 1000000;
     grass.init(grassBladeCount, xRange, zRange, sampleHeight);
 
     glEnable(GL_DEPTH_TEST);
     lastFrameTime = static_cast<float>(glfwGetTime());
-    texture_manager.add("assets/textures/grass.jpg", "terrain");
-    texture_manager.add("assets/textures/grass_blade.png", "grass");
+
+    TextureConfig repeatCfg{};
+    repeatCfg.wrapS = GL_REPEAT;
+    repeatCfg.wrapT = GL_REPEAT;
+
+    TextureConfig clampCfg{};
+    clampCfg.wrapS = GL_CLAMP_TO_EDGE;
+    clampCfg.wrapT = GL_CLAMP_TO_EDGE;
+
+    texture_manager.add("assets/textures/grass.jpg", "terrain", repeatCfg);
+    texture_manager.add("assets/textures/grass_blade.png", "grass", clampCfg);
     /*
 	unsigned int terrainTex;
 	glGenTextures(1, &terrainTex);
@@ -183,6 +232,7 @@ void Engine::run() {
 	int frameCount = 0;
 	static float grassDensity = 0.5f;  // Default value
 
+    std::vector<Object> loadedObjects;
     while (!glfwWindowShouldClose(glfwWin)) {
         float currentTime = static_cast<float>(glfwGetTime());
         float deltaTime = currentTime - lastFrameTime;
@@ -215,7 +265,23 @@ void Engine::run() {
         ImGui::Text("Average FPS: %.1f", averageFPS);
         ImGui::Text("Frame time: %.3f ms", deltaTime * 1000.0f);
         ImGui::Text("Grass blades: %u", grassBladeCount);
-		/* imguiframe stuff end */
+        if (ImGui::Button("Load Model"))
+        {
+            if (auto selectedPath = open_model_dialog())
+            {
+                // Construct object in-place inside the vector
+                loadedObjects.emplace_back(*selectedPath);
+
+                // Set its transform
+                Object& newObj = loadedObjects.back();
+                glm::vec3 camPos    = camera.getPosition();
+                glm::vec3 camForward = camera.getFront();
+                float spawnDistance = 5.0f;
+                newObj.setPosition(camPos + camForward * spawnDistance);
+            }
+        }
+
+
 
 
         window.setColor(0.361f, 0.6f, 1.0f);
@@ -247,7 +313,6 @@ void Engine::run() {
 			grassBladeCount = newBladeCount;
 			grass.init(grassBladeCount, xRange, zRange, sampleHeight);  // Re-initialize grass with new blade count
 		}		
-        texture_manager.use("grass",1);
         grass.draw(grassShader, view, projection, currentTime, texture_manager.get("grass"));
         //glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
@@ -263,10 +328,13 @@ void Engine::run() {
         model.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
         model.setVec3("objectColor", glm::vec3(0.43f, 0.21f, 0.08f));
         for (int i = 0; i < 20; i ++) {
-            treeObject.setPosition(glm::vec3(0.0f,0.0f,static_cast<float>(i)*20.0f));
+           treeObject.setPosition(glm::vec3(0.0f,0.0f,static_cast<float>(i)*20.0f));
 		    treeObject.draw(model);
         }
 
+        for (auto& obj : loadedObjects) {
+            obj.draw(model);
+        }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -298,8 +366,9 @@ void Engine::processInput(float deltaTime) {
     if (glfwGetKey(glfwWin, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(glfwWin, true);
 
-    if (glfwGetKey(glfwWin, GLFW_KEY_W) == GLFW_PRESS)
+    if (glfwGetKey(glfwWin, GLFW_KEY_W) == GLFW_PRESS) {
         camera.processKeyboard(CameraMovement::Forward, deltaTime);
+    }
     if (glfwGetKey(glfwWin, GLFW_KEY_S) == GLFW_PRESS)
         camera.processKeyboard(CameraMovement::Backward, deltaTime);
     if (glfwGetKey(glfwWin, GLFW_KEY_A) == GLFW_PRESS)

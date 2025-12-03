@@ -19,6 +19,7 @@ void Camera::setAspectRatio(float aspect) {
     aspectRatio = aspect;
 }
 
+
 glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(position, position + front, up);
 }
