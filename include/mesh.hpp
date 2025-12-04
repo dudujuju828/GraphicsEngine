@@ -18,16 +18,23 @@ private:
 
 public:
     ~Mesh();
+
+    // constructors you already have
     Mesh(const std::filesystem::path& objfile_path);
-
     Mesh(const std::vector<float>& positions);
-
     Mesh(const std::vector<float>& positions,
          const std::vector<float>& normals);
+
+    // NEW: disable copying (avoid double-delete / shallow copies)
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+
+    // NEW: enable moving (transfer ownership of VAO/VBO/NBO)
+    Mesh(Mesh&& other) noexcept;
+    Mesh& operator=(Mesh&& other) noexcept;
 
     void use();
     void draw();
 };
 
 #endif
-

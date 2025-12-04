@@ -66,6 +66,42 @@ Mesh::Mesh(const std::vector<float>& positions,
     initBuffers(positions, &normals);
 }
 
+Mesh::Mesh(Mesh&& other) noexcept
+    : VBO(other.VBO)
+    , NBO(other.NBO)
+    , VAO(other.VAO)
+    , vertexCount(other.vertexCount)
+    , hasNormals(other.hasNormals)
+{
+    other.VBO = 0;
+    other.NBO = 0;
+    other.VAO = 0;
+    other.vertexCount = 0;
+    other.hasNormals = false;
+}
+
+Mesh& Mesh::operator=(Mesh&& other) noexcept
+{
+    if (this != &other) {
+        if (VAO) glDeleteVertexArrays(1, &VAO);
+        if (VBO) glDeleteBuffers(1, &VBO);
+        if (NBO) glDeleteBuffers(1, &NBO);
+
+        VBO = other.VBO;
+        NBO = other.NBO;
+        VAO = other.VAO;
+        vertexCount = other.vertexCount;
+        hasNormals = other.hasNormals;
+
+        other.VBO = 0;
+        other.NBO = 0;
+        other.VAO = 0;
+        other.vertexCount = 0;
+        other.hasNormals = false;
+    }
+    return *this;
+}
+
 /*
     * Read in an object from path object. C++ 17 needed.
     * Triangulate converts all faces to triangles.
