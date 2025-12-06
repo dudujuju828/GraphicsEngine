@@ -73,6 +73,7 @@ add_executable(main
     src/grass.cpp
     src/texture_manager.cpp
     src/skybox.cpp
+    src/tree_field.cpp
 )
 
 target_include_directories(main PRIVATE

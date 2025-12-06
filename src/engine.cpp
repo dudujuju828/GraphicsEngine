@@ -6,6 +6,8 @@
 #include "../include/terrain.hpp"
 #include "../include/grass.hpp"
 #include "../include/skybox.hpp"
+#include "../include/tree_field.hpp"
+#include <functional>
 
 #include <string_view>
 #include <filesystem>
@@ -162,25 +164,35 @@ void Engine::run() {
     std::filesystem::path bunnyPath = "assets/models/bunny.obj";
     Object bunnyObject{bunnyPath};
 
-    std::filesystem::path treePath = "assets/models/tree.obj";
-    Object treeObject{treePath};
-	treeObject.setScale(glm::vec3(0.4f));
-
+    std::filesystem::path treePath = "assets/models/quiver_tree_02_4k.gltf/quiver_tree_02_4k.gltf";
+    Object treeObject{ treePath };
+    treeObject.setScale(glm::vec3(1.4f));
 
     GrassField grass;
+
     glm::vec2 xRange(-terrainSizeX * 0.5f, terrainSizeX * 0.5f);
     glm::vec2 zRange(-terrainSizeZ * 0.5f, terrainSizeZ * 0.5f);
-	auto sampleHeight = [&](float xWorld, float zWorld) -> float {
-		double nx = static_cast<double>(xWorld) * terrainFrequency;
-		double nz = static_cast<double>(zWorld) * terrainFrequency;
-		double h = perlin.octave2D_01(nx, nz, terrainOctaves);
-		h = h * 2.0 - 1.0;
-		return static_cast<float>(h * terrainAmplitude);
-	};
 
+    auto sampleHeight = [&](float xWorld, float zWorld) -> float {
+        double nx = static_cast<double>(xWorld) * terrainFrequency;
+        double nz = static_cast<double>(zWorld) * terrainFrequency;
+        double h = perlin.octave2D_01(nx, nz, terrainOctaves);
+        h = h * 2.0 - 1.0;
+        return static_cast<float>(h * terrainAmplitude);
+    };
 
-	int grassBladeCount = 1000000;
+    TreeField trees;
+    trees.generate(
+        5,
+        xRange,
+        zRange,
+        sampleHeight,
+        4242u
+    );
+
+    int grassBladeCount = 1000000;
     grass.init(grassBladeCount, xRange, zRange, sampleHeight);
+
 
     glEnable(GL_DEPTH_TEST);
     lastFrameTime = static_cast<float>(glfwGetTime());
@@ -336,15 +348,18 @@ void Engine::run() {
         model.setVec3("lightDir", glm::vec3(-0.5f, -1.0f, -0.3f));
         model.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
         model.setVec3("objectColor", glm::vec3(0.43f, 0.21f, 0.08f));
-        for (int i = 0; i < 20; i ++) {
+        /*for (int i = 0; i < 20; i ++) {
            treeObject.setPosition(glm::vec3(0.0f,0.0f,static_cast<float>(i)*20.0f));
 		    treeObject.draw(model);
         }
+        */
 
         for (auto& obj : loadedObjects) {
             obj.draw(model);
         }
 
+        model.setVec3("objectColor", glm::vec3(0.0f, 0.8f, 0.1f));
+        trees.draw(treeObject,model,50);
         skybox.draw(skyboxShader, view, projection);
 
         ImGui::Render();

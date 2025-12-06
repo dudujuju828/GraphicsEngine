@@ -18,6 +18,7 @@ Object::Object(Mesh&& mesh_) : mesh(std::move(mesh_)) {
 
 
 void Object::draw(Shader& shader) {
+    shader.useProgram();
     glm::mat4 model(1.0f);
     model = glm::translate(model, transform.position);
 
