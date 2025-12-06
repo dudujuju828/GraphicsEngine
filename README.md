@@ -60,6 +60,9 @@ All third-party libraries are built and linked statically, so no extra DLL setup
 ### Youtube
 https://www.youtube.com/@maxthomarino
 
+### Skybox
+![alt-text](media/skyboxdemo.png)
+
 ### Object Loading
 ![Grass demo](media/grass.gif)  
 ![alt-text](media/demo_landscape_gd.png)
