@@ -138,7 +138,7 @@ void Engine::run() {
     const siv::PerlinNoise::seed_type seed = 123456u;
     siv::PerlinNoise perlin{ seed };
 
-    unsigned int scale = 2;
+    unsigned int scale = 4;
     unsigned int terrainXSegments = 200 * scale;
     unsigned int terrainZSegments = 200 * scale;
     float terrainSizeX = 100.0f * scale;
