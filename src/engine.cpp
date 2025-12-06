@@ -5,6 +5,7 @@
 #include "../include/shader.hpp"
 #include "../include/terrain.hpp"
 #include "../include/grass.hpp"
+#include "../include/skybox.hpp"
 
 #include <string_view>
 #include <filesystem>
@@ -120,6 +121,17 @@ void Engine::run() {
     Shader shader("assets/shaders/vertex/vertex_s.glsl", "assets/shaders/fragment/fragment_s.glsl");
     Shader model("assets/shaders/vertex/model_vs.glsl", "assets/shaders/fragment/model_fs.glsl");
     Shader grassShader("assets/shaders/vertex/grass_vs.glsl", "assets/shaders/fragment/grass_fs.glsl");
+    Shader skyboxShader("assets/shaders/vertex/skybox_vs.glsl",
+                    "assets/shaders/fragment/skybox_fs.glsl");
+
+    Skybox skybox({
+        "assets/skybox/px.png",
+        "assets/skybox/nx.png",
+        "assets/skybox/py.png",
+        "assets/skybox/ny.png",
+        "assets/skybox/pz.png",
+        "assets/skybox/nz.png"
+    });
 
     const siv::PerlinNoise::seed_type seed = 123456u;
     siv::PerlinNoise perlin{ seed };
@@ -153,9 +165,6 @@ void Engine::run() {
     std::filesystem::path treePath = "assets/models/tree.obj";
     Object treeObject{treePath};
 	treeObject.setScale(glm::vec3(0.4f));
-
-    std::filesystem::path swordPath = "assets/models/sword_dom/scene.gltf";
-    Object swordObject{swordPath};
 
 
     GrassField grass;
@@ -335,6 +344,8 @@ void Engine::run() {
         for (auto& obj : loadedObjects) {
             obj.draw(model);
         }
+
+        skybox.draw(skyboxShader, view, projection);
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
